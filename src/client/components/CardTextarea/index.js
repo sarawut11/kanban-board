@@ -26,7 +26,7 @@ const handleOnFocus = (e) => {
 };
 
 const CardTextarea = ({...props}) => {
-  return <StyledCardTextarea autoFocus useCacheForDOMMeasurements onFocus={handleOnFocus} {...props} />;
+  return <StyledCardTextarea useCacheForDOMMeasurements onFocus={handleOnFocus} {...props} />;
 };
 
 export default CardTextarea;

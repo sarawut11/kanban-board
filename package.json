@@ -4,6 +4,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "webpack --mode development",
+    "devbuild": "webpack --mode development --watch",
     "serve": "nodemon dist/server.js",
     "start": "node dist/server.js"
   },

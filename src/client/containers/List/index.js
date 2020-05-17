@@ -276,6 +276,7 @@ const List = ({dispatch, boardId, cards, list}) => {
                           <InputWrapper>
                             <span className="title">Title</span>
                             <CardTextarea
+                              autoFocus
                               value={tempCardInfo.title}
                               onChange={(e) => handleCardEditorChange(e, 'title')}
                             />
@@ -315,6 +316,7 @@ const List = ({dispatch, boardId, cards, list}) => {
                 <InputWrapper>
                   <span className="title">Title</span>
                   <CardTextarea
+                    autoFocus
                     value={newCardInfo.title}
                     onChange={(e) => handleCardComposerChange(e, 'title')}
                   />
