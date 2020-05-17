@@ -3,9 +3,9 @@
   "version": "0.1.1",
   "main": "dist/server.js",
   "scripts": {
-    "build": "webpack --mode development --watch",
+    "build": "webpack --mode development",
     "serve": "nodemon dist/server.js",
-    "start": "webpack --mode development && node dist/server.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "axios": "^0.18.1",
