@@ -100,7 +100,9 @@ const Board = ({dispatch, lists, boardTitle, boardId}) => {
                   </Draggable>
                 ))}
                 {droppableProvided.placeholder}
-                <ListAdder boardId={boardId} style={{height: 'initial'}} />
+                {lists.length < 6 && (
+                  <ListAdder boardId={boardId} style={{height: 'initial'}} />
+                )}
               </ListsWrapper>
             )}
           </Droppable>
