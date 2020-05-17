@@ -4,7 +4,6 @@ import {Droppable, Draggable} from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import Modal from 'react-modal';
 import Dropdown from 'react-dropdown';
-import Button from '../../components/Button';
 import ListCard from '../../components/ListCard';
 import ListTitleButton from '../../components/ListTitleButton';
 import DeleteListButton from '../../components/DeleteListButton';
@@ -13,15 +12,7 @@ import EditCardButton from '../../components/EditCardButton';
 import CardTextarea from '../../components/CardTextarea';
 import ListTitleTextarea from '../../components/ListTitleTextarea';
 import {addCard, editCardTitle, deleteCard, editListTitle, deleteList} from '../../actions/actionCreators';
-// require('react-dropdown/style.css');
 
-const TextareaWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin: 0 10px;
-`;
 
 const ListTitleTextareaWrapper = styled.div`
   height: 48px;
@@ -29,10 +20,6 @@ const ListTitleTextareaWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   padding: 0 10px;
-`;
-
-const CardTextareaWrapper = styled(TextareaWrapper)`
-  margin: 0 10px 10px 10px;
 `;
 
 const ComposerWrapper = styled.div`
@@ -90,6 +77,26 @@ const InputWrapper = styled.div`
   }
 `
 
+const StyledModalButtonWrapper = styled.div`
+  margin-top: 20px;
+  width: 100%;
+  button {
+    &:nth-child(2) {
+      margin-right: 10px;
+    }
+    float: right;
+  }
+`
+
+const StyledCreatedInfo = styled.label`
+  display: block;
+  width: 100%;
+  text-align: right;
+  color: grey;
+  font-size: 12px;
+  margin: 10px 0;
+`
+
 const customStyles = {
   content : {
     top                   : '50%',
@@ -105,7 +112,6 @@ const customStyles = {
 const options = [
   'open', 'closed'
 ];
-const defaultOption = options[0];
 
 Modal.setAppElement('#app')
 
@@ -113,14 +119,29 @@ const List = ({dispatch, boardId, cards, list}) => {
   const [newCardFormIsOpen, setNewCardFormIsOpen] = useState(false);
   const [isListTitleInEdit, setIsListTitleInEdit] = useState(false);
   const [cardInEdit, setCardInEdit] = useState(null);
-  const [newCardTitle, setNewCardTitle] = useState('');
+  const [newCardInfo, setNewCardInfo] = useState('');
   const [newListTitle, setNewListTitle] = useState('');
-  const [tempCardTitle, setTempCardTitle] = useState('');
+  const [tempCardInfo, setTempCardInfo] = useState({});
+  const toggleCardComposer = () => {
+    setNewCardFormIsOpen(!newCardFormIsOpen);
+    setNewCardInfo({
+      title: '',
+      description: ''
+    })
+  }
 
-  const toggleCardComposer = () => setNewCardFormIsOpen(!newCardFormIsOpen);
-
-  const handleCardComposerChange = (event) => {
-    setNewCardTitle(event.target.value);
+  const handleCardComposerChange = (event, type) => {
+    if (type === 'title') {
+      setNewCardInfo({
+        ...newCardInfo,
+        title: event.target.value
+      });
+    } else if (type === 'description') {
+      setNewCardInfo({
+        ...newCardInfo,
+        description: event.target.value
+      });
+    }
   };
 
   const handleKeyDown = (event, callback) => {
@@ -129,36 +150,52 @@ const List = ({dispatch, boardId, cards, list}) => {
     }
   };
 
-  const handleSubmitCard = (event) => {
-    event.preventDefault();
+  const handleSubmitCard = () => {
     setNewCardFormIsOpen(false);
-    if (newCardTitle.length < 1) return;
-    dispatch(addCard(newCardTitle, list._id, boardId));
-    setNewCardTitle('');
+    dispatch(addCard({
+      ...newCardInfo,
+      status: 'open',
+      created_date: new Date()
+    }, list._id, boardId));
   };
 
   const openCardEditor = (card) => {
-    console.log('open card editor')
     setCardInEdit(card._id);
-    setTempCardTitle(card.title);
+    setTempCardInfo({
+      ...tempCardInfo,
+      title: card.info.title,
+      description: card.info.description,
+      status: card.info.status,
+      created_date: card.info.created_date
+    });
   };
 
-  const handleCardEditorChange = (event) => {
-    setTempCardTitle(event.target.value);
+  const handleCardEditorChange = (event, type) => {
+    if (type === 'title') {
+      setTempCardInfo({
+        ...tempCardInfo,
+        title: event.target.value
+      });
+    } else if (type === 'description') {
+      setTempCardInfo({
+        ...tempCardInfo,
+        description: event.target.value
+      });
+    } else if (type === 'status') {
+      setTempCardInfo({
+        ...tempCardInfo,
+        status: event.value
+      });
+    }
   };
+
+  const onEditSubmit = () => {
+    modalClose()
+    dispatch(editCardTitle(tempCardInfo, cardInEdit, list, boardId));
+  }
 
   const handleListTitleEditorChange = (event) => {
     setNewListTitle(event.target.value);
-  };
-
-  const handleCardEdit = () => {
-    if (tempCardTitle.length < 1) {
-      handleDeleteCard(cardInEdit);
-    } else {
-      dispatch(editCardTitle(tempCardTitle.trim(), cardInEdit, list, boardId));
-    }
-    setTempCardTitle('');
-    setCardInEdit(null);
   };
 
   const handleDeleteCard = (cardId) => {
@@ -182,8 +219,16 @@ const List = ({dispatch, boardId, cards, list}) => {
     dispatch(deleteList(list.cards, list._id, boardId));
   };
 
-  const onCardStatusSelect = (e) => {
-    console.log(e)
+  const modalClose = () => {
+    setTempCardInfo('');
+    setCardInEdit(null);
+    setNewCardInfo('');
+    setNewCardFormIsOpen(null);
+  }
+
+  const renderDate = (date) => {
+    var d = new Date(date);
+    return d.getDate()  + "/" + (d.getMonth()+1) + "/" + d.getFullYear()
   }
 
   return (
@@ -216,7 +261,7 @@ const List = ({dispatch, boardId, cards, list}) => {
                         {...dragHandleProps}
                         data-react-beautiful-dnd-draggable="0"
                         data-react-beautiful-dnd-drag-handle="0">
-                        {card.title}
+                        {card.info.title}
                         <ButtonWrapper>
                           <DeleteCardButton onClick={() => handleDeleteCard(card._id)} />
                           <EditCardButton onClick={() => openCardEditor(card)} />
@@ -231,56 +276,64 @@ const List = ({dispatch, boardId, cards, list}) => {
                           <InputWrapper>
                             <span className="title">Title</span>
                             <CardTextarea
-                              value={tempCardTitle}
-                              onChange={handleCardEditorChange}
-                              onKeyDown={(e) => handleKeyDown(e, handleCardEdit)}
-                              // onBlur={handleCardEdit}
+                              value={tempCardInfo.title}
+                              onChange={(e) => handleCardEditorChange(e, 'title')}
                             />
                           </InputWrapper>
                           <InputWrapper>
                             <span className="title">Description</span>
                             <CardTextarea
-                              value={tempCardTitle}
-                              onChange={handleCardEditorChange}
-                              onKeyDown={(e) => handleKeyDown(e, handleCardEdit)}
-                              // onBlur={handleCardEdit}
+                              value={tempCardInfo.description}
+                              onChange={(e) => handleCardEditorChange(e, 'description')}
                             />
                           </InputWrapper>
                           <InputWrapper>
                             <span className="title">Status</span>
-                            <Dropdown options={options} onChange={onCardStatusSelect} value={defaultOption} placeholder="Select an option" />
+                            <Dropdown options={options} onChange={(e) => handleCardEditorChange(e, 'status')} value={tempCardInfo.status} placeholder="Select an option" />
                           </InputWrapper>
+                          <StyledCreatedInfo>created at: {renderDate(tempCardInfo.created_date)}</StyledCreatedInfo>
                           <ButtonWrapper>
-                            <button>test</button>
-                            <button>test</button>
+                            <StyledModalButtonWrapper>
+                              <button onClick={() => onEditSubmit()}>Save</button>
+                              <button onClick={() => modalClose()}>Close</button>
+                            </StyledModalButtonWrapper>
                           </ButtonWrapper>
                         </Modal>
-                      }                       
-                      {/* <TextareaWrapper ref={innerRef} {...draggableProps} {...dragHandleProps}>
-                         <CardTextarea
-                           value={tempCardTitle}
-                           onChange={handleCardEditorChange}
-                           onKeyDown={(e) => handleKeyDown(e, handleCardEdit)}
-                           onBlur={handleCardEdit}
-                         />
-                       </TextareaWrapper> */}
+                      }
                     {placeholder}
                   </div>
                 )}
               </Draggable>
             ))}
             {provided.placeholder}
-            {newCardFormIsOpen && (
-              <CardTextareaWrapper>
-                <CardTextarea
-                  value={newCardTitle}
-                  onChange={handleCardComposerChange}
-                  onKeyDown={(e) => handleKeyDown(e, handleSubmitCard)}
-                  onBlur={handleSubmitCard}
-                />
-                <button onClick={handleSubmitCard}>add</button>
-              </CardTextareaWrapper>
-            )}
+            {
+              newCardFormIsOpen && <Modal
+                isOpen={true}
+                style={customStyles}
+                contentLabel="Example Modal"
+              >
+                <InputWrapper>
+                  <span className="title">Title</span>
+                  <CardTextarea
+                    value={newCardInfo.title}
+                    onChange={(e) => handleCardComposerChange(e, 'title')}
+                  />
+                </InputWrapper>
+                <InputWrapper>
+                  <span className="title">Description</span>
+                  <CardTextarea
+                    value={newCardInfo.description}
+                    onChange={(e) => handleCardComposerChange(e, 'description')}
+                  />
+                </InputWrapper>
+                <ButtonWrapper>
+                  <StyledModalButtonWrapper>
+                    <button onClick={() => handleSubmitCard()}>Create</button>
+                    <button onClick={() => modalClose()}>Close</button>
+                  </StyledModalButtonWrapper>
+                </ButtonWrapper>
+              </Modal>
+            }
             {newCardFormIsOpen || (
               <ComposerWrapper>
                 <button onClick={toggleCardComposer}>

@@ -2,7 +2,7 @@ import React from 'react';
 import {Route} from 'react-router-dom';
 import {createGlobalStyle} from 'styled-components';
 import Board from '../Board';
-
+import './style.css'
 const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
