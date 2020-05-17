@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --mode development --watch",
     "serve": "nodemon dist/server.js",
-    "start": "node dist/server.js"
+    "start": "webpack --mode development && node dist/server.js"
   },
   "dependencies": {
     "axios": "^0.18.1",
