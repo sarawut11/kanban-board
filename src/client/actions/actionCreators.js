@@ -2,26 +2,26 @@ import axios from 'axios';
 import shortid from 'shortid';
 /* eslint-disable no-console */
 
-export const addCard = (cardTitle, listId, boardId) => (dispatch) => {
+export const addCard = (cardInfo, listId, boardId) => (dispatch) => {
   const cardId = shortid.generate();
   dispatch({
     type: 'ADD_CARD',
-    payload: {cardTitle, cardId, listId}
+    payload: {cardInfo, cardId, listId}
   });
-  axios.post('/api/card', {cardTitle, cardId, listId, boardId}).then(({data}) => console.log(data));
+  axios.post('/api/card', {cardInfo, cardId, listId, boardId}).then(({data}) => console.log(data));
 };
 
-export const editCardTitle = (cardTitle, cardId, list, boardId) => (dispatch) => {
+export const editCardTitle = (cardInfo, cardId, list, boardId) => (dispatch) => {
   dispatch({
-    type: 'EDIT_CARD_TITLE',
+    type: 'EDIT_CARD',
     payload: {
-      cardTitle,
+      cardInfo,
       cardId,
       listId: list._id
     }
   });
   const cardIndex = list.cards.indexOf(cardId);
-  axios.put('/api/card', {cardTitle, cardIndex, listId: list._id, boardId}).then(({data}) => console.log(data));
+  axios.put('/api/card', {cardInfo, cardIndex, listId: list._id, boardId}).then(({data}) => console.log(data));
 };
 
 export const deleteCard = (cardId, listId, boardId) => (dispatch) => {
@@ -82,24 +82,6 @@ export const deleteList = (cards, listId, boardId) => (dispatch) => {
   axios.delete('/api/list', {data: {listId, boardId}}).then(({data}) => console.log(data));
 };
 
-export const addBoard = (boardTitle) => (dispatch) => {
-  const boardId = shortid.generate();
-  dispatch({
-    type: 'ADD_BOARD',
-    payload: {boardTitle, boardId}
-  });
-
-  axios.post('/api/board', {boardTitle, boardId}).then(({data}) => console.log(data));
-};
-
-export const deleteBoard = (boardId) => (dispatch) => {
-  dispatch({
-    type: 'DELETE_BOARD',
-    payload: {boardId}
-  });
-  axios.delete('/api/board', {data: {boardId}}).then(({data}) => console.log(data));
-};
-
 export const reorderBoard = (listId, sourceId, sourceIndex, destinationIndex) => (dispatch) => {
   dispatch({
     type: 'REORDER_LISTS',
@@ -109,13 +91,4 @@ export const reorderBoard = (listId, sourceId, sourceIndex, destinationIndex) =>
       destinationIndex
     }
   });
-
-  axios
-    .put('/api/reorder-board', {
-      listId,
-      sourceId,
-      sourceIndex,
-      destinationIndex
-    })
-    .then(({data}) => console.log(data));
 };

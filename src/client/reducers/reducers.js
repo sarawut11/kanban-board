@@ -1,9 +1,9 @@
 const cardsById = (state = {}, action) => {
   switch (action.type) {
     case "ADD_CARD":
-    case "EDIT_CARD_TITLE": {
-      const { cardTitle, cardId } = action.payload;
-      return { ...state, [cardId]: { title: cardTitle, _id: cardId } };
+    case "EDIT_CARD": {
+      const { cardInfo, cardId } = action.payload;
+      return { ...state, [cardId]: { info: cardInfo, _id: cardId } };
     }
     case "DELETE_CARD": {
       const { cardId } = action.payload;
@@ -97,18 +97,6 @@ const listsById = (state = {}, action) => {
 
 const boardsById = (state = {}, action) => {
   switch (action.type) {
-    case "ADD_BOARD": {
-      const { boardId, boardTitle } = action.payload;
-      return {
-        ...state,
-        [boardId]: { _id: boardId, title: boardTitle, lists: [] }
-      };
-    }
-    case "DELETE_BOARD": {
-      const { boardId } = action.payload;
-      const { [boardId]: deletedBoard, ...restOfBoards } = state;
-      return restOfBoards;
-    }
     case "ADD_LIST": {
       const { boardId, listId } = action.payload;
       return {

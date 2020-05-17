@@ -4,32 +4,20 @@ const api = (db) => {
   const router = Router();
   const boards = db.collection('boards');
 
-  router.post('/board', (req, res) => {
-    const {boardTitle, boardId} = req.body;
-
-    boards.insert({_id: boardId, title: boardTitle, lists: []}).then((result) => res.send(result));
-  });
-
-  router.delete('/board', (req, res) => {
-    const {boardId} = req.body;
-
-    boards.findOneAndDelete({_id: boardId}).then((result) => res.send(result));
-  });
-
   router.post('/card', (req, res) => {
-    const {cardTitle, cardId, listId, boardId} = req.body;
+    const {cardInfo, cardId, listId, boardId} = req.body;
 
     boards
-      .updateOne({_id: boardId, 'lists._id': listId}, {$push: {'lists.$.cards': {_id: cardId, title: cardTitle}}})
+      .updateOne({_id: boardId, 'lists._id': listId}, {$push: {'lists.$.cards': {_id: cardId, info: cardInfo}}})
       .then((result) => res.send(result));
   });
 
   router.put('/card', (req, res) => {
-    const {cardTitle, cardIndex, listId, boardId} = req.body;
+    const {cardInfo, cardIndex, listId, boardId} = req.body;
 
-    const title = `lists.$.cards.${cardIndex}.title`;
+    const info = `lists.$.cards.${cardIndex}.info`;
     boards
-      .updateOne({_id: boardId, 'lists._id': listId}, {$set: {[title]: cardTitle}})
+      .updateOne({_id: boardId, 'lists._id': listId}, {$set: {[info]: cardInfo}})
       .then((result) => res.send(result));
   });
 
@@ -84,23 +72,6 @@ const api = (db) => {
         );
         res.send({value, card});
       });
-  });
-
-  router.put('/reorder-board', (req, res) => {
-    const {listId, sourceId, sourceIndex, destinationIndex} = req.body;
-
-    boards.findOneAndUpdate({_id: sourceId}, {$pull: {lists: {_id: listId}}}).then(({value}) => {
-      const list = value.lists[sourceIndex];
-      db.collection('boards').updateOne(
-        {_id: sourceId},
-        {
-          $push: {
-            lists: {$each: [list], $position: destinationIndex}
-          }
-        }
-      );
-      res.send({value, list});
-    });
   });
 
   return router;
